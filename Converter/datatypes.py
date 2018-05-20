@@ -156,6 +156,7 @@ class FreeSolid (object):
         fsel.set("color", str(self.color))
         fsel.set("mass", str(self.mass))
         fsel.set("relativeGravity", str(self.relative_gravity))
+        # TODO: Something different
         if self.shape == "bspW1x1":
             block = Block()
             block.size = Point3D()
@@ -163,7 +164,7 @@ class FreeSolid (object):
             block.size.y = 3
             block.size.z = 5
             block.center = self.location
-            block.center.y += block.size.y/Decimal(2)
+            block.center.y += block.size.y / Decimal(2)
             block.color = self.color
             block.to_xml(fsel)
         else:

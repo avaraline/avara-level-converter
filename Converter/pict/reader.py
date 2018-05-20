@@ -20,8 +20,8 @@ def parse(pict):
             print('ERROR: Unknown opcode ' + str(hex(opcode)))
             return
 
-        #if isinstance(op, operations.VariableReserved):
-            #print binascii.hexlify(data)
+        # if isinstance(op, operations.VariableReserved):
+            # print binascii.hexlify(data)
 
         data = data[2:]
 

@@ -27,7 +27,9 @@ class Reader(object):
         resmap = rawData[mapOffset:mapOffset + mapLength]
 
         nameOffset = bytes_to_short(resmap[26:28])
-        numTypes = bytes_to_short(resmap[28:30]) + 1 
+
+        # this is off by one (?) so we add one here
+        numTypes = bytes_to_short(resmap[28:30]) + 1
         typeLength = 8 * (numTypes)
         # the part of the header that tells us the offset lies
         rawTypes = resmap[30:30 + typeLength]

@@ -2,8 +2,9 @@ from Converter import resource
 from Converter.converter import Converter
 import Converter.pict.reader as pReader
 import Converter.ledi.reader as lediReader
-import Converter.hsnd.reader as hsndReader
+import Converter.bspt.reader as bsptReader
 from lxml import etree
+import wave
 import argparse
 import sys
 
@@ -39,18 +40,36 @@ def get_resources(file):
 
 
 def save_hsnds(resource):
-    hsndReader.parse(resource)
+    for resid in resource.keys():
+        snd_dict = resource[resid]
+        snd_name = snd_dict['name']
+        raw_data = snd_dict['data']
+        filename = snd_name + ".wav"
+        print("Writing HSND %s as %s" % (snd_name, filename))
+        with wave.open(filename, 'wb') as wavfile:
+            wavfile.setparams((2, 2, 22050, 0, 'NONE', 'NONE'))
+            wavfile.writeframes(raw_data)
 
-def convert_set(resources):
-    set_ledi = lediReader.parse(resources['LEDI'])
-    save_hsnds(resources['HSND'])
-    picts_r = resources['PICT']
-    for pict in picts_r.values():
+
+def save_shapes(resource):
+    bsps = bsptReader.parse(resource)
+    for bsp in bsps:
+        # TODO: save something
+        # (we have data but no intermediary format)
+        # print(bsp)
+        print("Nothing to do for BSPT %s" % bsp.name)
+
+
+def save_maps(resource, set_ledi):
+    for pict in resource.values():
         ops = pReader.parse(pict['data'])
         conv = Converter()
         mapxml = conv.convert(ops)
         pictname = pict['name']
         filename = pictname + '.xml'
+        if pictname not in set_ledi['items']:
+            print("No LEDI found for %s, skipping" % pictname)
+            continue
         ledi = set_ledi['items'][pictname]
 
         print("Writing level %s to %s" % (ledi['title'], filename))
@@ -59,10 +78,17 @@ def convert_set(resources):
             print("Error converting " + filename)
             continue
 
-        xmlstring = etree.tostring(mapxml, pretty_print=True).decode('macintosh')
+        xmlstring = etree.tostring(mapxml, pretty_print=True)
         f = open(filename, 'w')
-        f.write(xmlstring)
+        f.write(xmlstring.decode('macintosh'))
         f.close()
+
+
+def convert_set(resources):
+    set_ledi = lediReader.parse(resources['LEDI'])
+    save_hsnds(resources['HSND'])
+    save_shapes(resources['BSPT'])
+    save_maps(resources['PICT'], set_ledi)
 
 
 if __name__ == '__main__':

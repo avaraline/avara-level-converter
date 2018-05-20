@@ -10,7 +10,7 @@ def parse(resource):
     # LEDI resource is always at index 128
     ledis_raw = resource[128]['data']
 
-    ledi = {} # results
+    ledi = {}  # results
     # each record is separated by 9 null values
     terminator = b''.join(b'\x00' for x in range(9))
 
@@ -21,7 +21,7 @@ def parse(resource):
     ledi['items'] = {}
     ledis_raw_list = ledis_raw[6:].split(terminator)[:-1]
     for ledi_raw in ledis_raw_list:
-        # some of these are padded with nulls 
+        # some of these are padded with nulls
         # (to be an even number of bytes i guess)
         ledi_raw = ledi_raw.strip(b"\x00")
         this_ledi = {}
@@ -41,8 +41,7 @@ def parse(resource):
         this_ledi['title'] = bytes_to_string(strs[0])
         this_ledi['msg'] = bytes_to_string(strs[1])
         this_ledi['file'] = bytes_to_string(strs[2])
-        
-        
+
         ledi['items'][this_ledi['file']] = this_ledi
 
     return ledi
