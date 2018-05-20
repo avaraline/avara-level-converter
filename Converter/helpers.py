@@ -53,3 +53,14 @@ def bytes_to_fixed(some_bytes):
     frac = bytes_to_unsigned_short(some_bytes[2:4]) / 65535.0
     # print("Whole: %d Frac: %f" % (whole, frac))
     return whole + frac
+
+
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
+def list_of_fixedsize_recs(data, offset, size, count, the_class):
+    list_end = offset + (size * count)
+    list_data = data[offset:list_end]
+    return [the_class(x) for x in chunks(list_data, size)]
