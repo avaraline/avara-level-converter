@@ -3,10 +3,18 @@ from Converter.converter import Converter
 import Converter.pict.reader as pReader
 import Converter.ledi.reader as lediReader
 import Converter.bspt.reader as bsptReader
+from Converter.helpers import byte_to_unsigned_tiny_int
 from lxml import etree
 import wave
 import argparse
 import sys
+import json
+import ffmpeg
+
+try:
+    import audioop
+except:
+    print("python module `audioop` not found, no sounds will be exported")
 
 
 def try_read(file):
@@ -40,24 +48,27 @@ def get_resources(file):
 
 
 def save_hsnds(resource):
+    if not audioop:
+        return
     for resid in resource.keys():
         snd_dict = resource[resid]
         snd_name = snd_dict['name']
-        raw_data = snd_dict['data']
-        filename = snd_name + ".wav"
-        print("Writing HSND %s as %s" % (snd_name, filename))
-        with wave.open(filename, 'wb') as wavfile:
-            wavfile.setparams((2, 2, 22050, 0, 'NONE', 'NONE'))
-            wavfile.writeframes(raw_data)
+        # raw_data = snd_dict['data']
+        filename = "%d_%s" % (resid, snd_name)
+        print("Nothing to do for HSND %s" % (filename))
+        # TODO: read sound data
 
 
 def save_shapes(resource):
     bsps = bsptReader.parse(resource)
     for bsp in bsps:
-        # TODO: save something
-        # (we have data but no intermediary format)
-        # print(bsp)
-        print("Nothing to do for BSPT %s" % bsp.name)
+        filename = "%d_%s.avarabsp.json" % (bsp.res_id, bsp.name)
+        print("Writing BSPT %s" % filename)
+        with open(filename, "w") as bsp_file:
+            json.dump(
+                bsp.serialize(),
+                bsp_file,
+                separators=(',', ': '))
 
 
 def save_maps(resource, set_ledi):
@@ -79,15 +90,16 @@ def save_maps(resource, set_ledi):
             continue
 
         xmlstring = etree.tostring(mapxml, pretty_print=True)
-        f = open(filename, 'w')
-        f.write(xmlstring.decode('macintosh'))
-        f.close()
+        with open(filename, 'w') as f:
+            f.write(xmlstring.decode('macintosh'))
 
 
 def convert_set(resources):
     set_ledi = lediReader.parse(resources['LEDI'])
-    save_hsnds(resources['HSND'])
-    save_shapes(resources['BSPT'])
+    if 'HSND' in resources:
+        save_hsnds(resources['HSND'])
+    if 'BSPT' in resources:
+        save_shapes(resources['BSPT'])
     save_maps(resources['PICT'], set_ledi)
 
 

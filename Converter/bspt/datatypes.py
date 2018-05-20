@@ -1,10 +1,19 @@
 from Converter.helpers import *
 
 
+class SerializableThing(object):
+
+    def serialize(self):
+        the_list = []
+        for attr, value in self.__dict__.items():
+            the_list.append(value)
+        return the_list
+
+
 UniquePointLength = 16
 
 
-class UniquePoint(object):
+class UniquePoint(SerializableThing):
     size = 16
 
     def __init__(self, raw_data):
@@ -22,7 +31,7 @@ class UniquePoint(object):
 NormalRecordLength = 8
 
 
-class NormalRecord(object):
+class NormalRecord(SerializableThing):
     def __init__(self, raw_data):
         assert(len(raw_data) == NormalRecordLength)
         self.normal_index = bytes_to_unsigned_short(raw_data[0:2])
@@ -38,7 +47,7 @@ class NormalRecord(object):
 EdgeRecordLength = 4
 
 
-class EdgeRecord(object):
+class EdgeRecord(SerializableThing):
     def __init__(self, raw_data):
         assert(len(raw_data) == EdgeRecordLength)
         self.a = bytes_to_unsigned_short(raw_data[0:2])
@@ -52,7 +61,7 @@ class EdgeRecord(object):
 PolyRecordLength = 16
 
 
-class PolyRecord(object):
+class PolyRecord(SerializableThing):
     def __init__(self, raw_data):
         assert(len(raw_data) == PolyRecordLength)
         self.first_edge = bytes_to_unsigned_short(raw_data[0:2])
@@ -71,7 +80,7 @@ class PolyRecord(object):
 ColorRecordLength = (32 * 2) + 4
 
 
-class ColorRecord(object):
+class ColorRecord(SerializableThing):
     def __init__(self, raw_data):
         assert(len(raw_data) == ColorRecordLength)
         self.color = bytes_to_long(raw_data[0:4])

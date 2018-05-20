@@ -5,6 +5,7 @@ from Converter.bspt.datatypes import *
 class BSP(object):
     # https://github.com/jmunkki/Avara/blob/master/src/Libraries/BSP/BSPResStructures.h
     def __init__(self, bsp_dict):
+        self.res_id = ""
         self.name = bsp_dict['name']
         raw_data = bsp_dict['data']
         self.ref_count = bytes_to_unsigned_short(raw_data[0:2])
@@ -87,7 +88,7 @@ class BSP(object):
         r = "%s - Total verticies: %d" % (self.name, self.point_count)
         r += "\nmin bound: %s" % self.min_bounds
         r += "\nmax bound: %s" % self.max_bounds
-        r += "\npoints: %d" % self.point_count
+        r += "\npoints: %s" % self.points
         r += "\nedges: %s" % self.edges
         r += "\npolys: %s" % self.polys
         r += "\nnormals: %s" % self.normals
@@ -96,10 +97,32 @@ class BSP(object):
         r += "\nunique edges: %s" % self.unique_edges
         return r
 
+    def serialize(self):
+        d = {}
+        d["name"] = self.name
+        d["res_id"] = self.res_id
+        d["enclosure_point"] = self.enclosure_point.serialize()
+        d["enclosure_radius"] = self.enclosure_radius
+        d["min_bounds"] = self.min_bounds.serialize()
+        d["max_bounds"] = self.max_bounds.serialize()
+        d["points"] = serialize_list(self.points)
+        d["normals"] = serialize_list(self.normals)
+        d["edges"] = self.edges
+        d["polys"] = serialize_list(self.polys)
+        d["colors"] = serialize_list(self.colors)
+        d["vectors"] = serialize_list(self.vectors)
+        d["unique_edges"] = serialize_list(self.unique_edges)
+        return d
+
+
+def serialize_list(the_list):
+    return [x.serialize() for x in the_list]
+
 
 def parse(resource):
     bsps = []
     for res_id in resource.keys():
         bsp = BSP(resource[res_id])
+        bsp.res_id = res_id
         bsps.append(bsp)
     return bsps

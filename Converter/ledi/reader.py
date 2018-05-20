@@ -36,8 +36,11 @@ def parse(resource):
             the_data = the_data[str_len + 1:]
             if the_data[:1] == b'\x00':
                 the_data = the_data[1:]
-
+        if len(strs) < 1:
+            continue
         this_ledi['ident'] = ident
+        print(strs)
+        print(ledi_raw)
         this_ledi['title'] = bytes_to_string(strs[0])
         this_ledi['msg'] = bytes_to_string(strs[1])
         this_ledi['file'] = bytes_to_string(strs[2])
