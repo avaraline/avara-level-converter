@@ -22,14 +22,12 @@ class Reader(object):
         mapOffset = bytes_to_int(header[4:8])
         dataLength = bytes_to_int(header[8:12])
         mapLength = bytes_to_int(header[12:16])
-        print(header)
         data = rawData[dataOffset:dataOffset + dataLength]
         # print(data)
         resmap = rawData[mapOffset:mapOffset + mapLength]
 
         nameOffset = bytes_to_short(resmap[26:28])
         numTypes = bytes_to_short(resmap[28:30]) + 1 
-        print (resmap)
         typeLength = 8 * (numTypes)
         # the part of the header that tells us the offset lies
         rawTypes = resmap[30:30 + typeLength]
@@ -42,7 +40,6 @@ class Reader(object):
             offset = bytes_to_short(rawTypes[(8 * i) + 6:(8 * i) + 8])
 
             types[name] = {'offset': offset, 'number': number}
-        print(types)
 
         list = {}
         for k, v in iter(types.items()):

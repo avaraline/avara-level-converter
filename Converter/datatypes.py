@@ -93,7 +93,7 @@ class Goody (object):
         self.grenades = 0
         self.missiles = 0
         self.respawn = 30
-        self.shape = None
+        self.shape = ""
         self.spin = Point3D()
 
     def to_xml(self, tree):
@@ -147,7 +147,7 @@ class FreeSolid (object):
         self.power = 4
         self.mass = 1
         self.relative_gravity = 1
-        self.shape = None
+        self.shape = ""
 
     def to_xml(self, tree):
         fsel = ET.SubElement(tree, "freesolid")

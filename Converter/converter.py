@@ -256,9 +256,9 @@ class Converter:
             elif thisText:
                 if hasattr(op, 'text'):
                     if lastText:
-                        self.cur_text += " " + op.text.decode('macintosh')
+                        self.cur_text += " " + op.text
                     else:
-                        self.cur_text = op.text.decode('macintosh')
+                        self.cur_text = op.text
 
             if thisText:
                 lastText = True

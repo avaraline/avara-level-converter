@@ -1,27 +1,30 @@
 import struct
 
 
-def bytes_to_int(bytes):
-    return struct.unpack('>i', bytes)[0]
+def bytes_to_string(some_bytes):
+    return some_bytes.decode("macintosh")
 
 
-def bytes_to_short(bytes):
-    return struct.unpack('>h', bytes)[0]
+def bytes_to_int(some_bytes):
+    return struct.unpack('>i', some_bytes)[0]
 
 
-def bytes_to_unsigned_short(bytes):
-    return struct.unpack('>H', bytes)[0]
+def bytes_to_short(some_bytes):
+    return struct.unpack('>h', some_bytes)[0]
 
 
-def bytes_to_string(bytes):
-    return struct.unpack('>' + str(len(bytes)) + 's', bytes)[0]
+def bytes_to_unsigned_short(some_bytes):
+    return struct.unpack('>H', some_bytes)[0]
+
+
+#def bytes_to_string(some_bytes):
+#    return struct.unpack('>' + str(len(some_bytes)) + 's', some_bytes)[0]
 
 
 def byte_to_unsigned_tiny_int(byte):
+    # in python 3, slicing off a single byte spins off an int object
     return byte
-    # tiny_int = b"\x00%d" % byte
-    # print("Len: " + str(len(tiny_int)))
-    # print("Tiny int: " + str(tiny_int))
+    # tiny_int = b"\x00%b" % bytes(byte)[:1]
     # return struct.unpack('>h', tiny_int)[0]
 
 
