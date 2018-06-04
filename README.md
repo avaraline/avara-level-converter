@@ -10,7 +10,7 @@ Required Python modules: `lxml`, `wave`, `json`, `argparse`, `struct`
 
 The resource file will be parsed for PICT and other data. 
 * Each PICT resource is given its own xml file.
-* The LEDI resource is parsed to get the name, tag, and pict file paths for each level in the set.
+* The LEDI resource is parsed to get the name, tag, and pict file paths for each level in the set. Or it's supposed to, it doesn't work on sets that have level completion dependencies just yet.
 * TEXT resources are parsed to get set-level variables and shape/sound aliases.
 * Each BSPT resource is exported to a json file that contains a representation of [Avara's BSP format](https://github.com/jmunkki/Avara/blob/a328b9e502d549364439c1c0ef4310a1e3a136dc/src/Libraries/BSP/BSPResStructures.h). 
 
@@ -38,5 +38,10 @@ people looking to parse and work with resource fork data in general.
 * each polygon refers to one or more edge numbers
 * each polygon also refers to a normal
 * each normal refers to a color 
-* the above data was enough for me to give something to a modern 3d engine
-* there's other stuff, i'm not sure what it does
+* each color record also contains a cache of different shades of that color (for white light only)
+* I do not export this cache for that reason and instead colors are in 4 floats in RGBA
+* if you have `numpy` and `triangle` installed, included are `triangles_polys` and `riangles_verts_polys`
+* these triangulate polygonal faces in avara bsps (in Avara, bsp faces were filled all at once, no matter how many vertexes or edges!)
+* `triangles_verts_polys` will be a list of verts in each poly for each poly so `poly[0]` will have `triangles_verts_polys[0]`, itself a list of vert indexes
+* the triangles_polys array contains a list of triangle faces that are indexes into triangles_verts_polys
+* I needed this to use an engine that only expected quads/triangles (as most do these days?!) 

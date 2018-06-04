@@ -4,6 +4,9 @@ from Converter.helpers import *
 
 
 def parse(pict):
+    if(len(pict) < 40):
+        print("ERROR: Pict is malformed (smaller than header size)")
+        return
     # The first 40 bytes are header information
     if bytes_to_int(pict[10:14]) != 0x001102ff:
         print("ERROR: Not a version 2 PICT")

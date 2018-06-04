@@ -150,12 +150,12 @@ class FreeSolid (object):
         self.shape = ""
 
     def to_xml(self, tree):
-        fsel = ET.SubElement(tree, "freesolid")
-        fsel.set("power", str(self.power))
-        fsel.set("location", str(self.location))
-        fsel.set("color", str(self.color))
-        fsel.set("mass", str(self.mass))
-        fsel.set("relativeGravity", str(self.relative_gravity))
+        el = ET.SubElement(tree, "freesolid")
+        el.set("power", str(self.power))
+        el.set("location", str(self.location))
+        el.set("color", str(self.color))
+        el.set("mass", str(self.mass))
+        el.set("relativeGravity", str(self.relative_gravity))
         # TODO: Something different
         if self.shape == "bspW1x1":
             block = Block()
@@ -166,7 +166,25 @@ class FreeSolid (object):
             block.center = self.location
             block.center.y += block.size.y / Decimal(2)
             block.color = self.color
-            block.to_xml(fsel)
+            block.to_xml(el)
         else:
-            fsel.set("shape", str(self.shape))
+            el.set("shape", str(self.shape))
+
+
+class Light (object):
+    def __init__(self):
+        self.intensity = .4
+        self.azimuth = 20
+        self.elevation = 45
+
+    def to_xml(self, tree):
+        el = ET.SubElement(tree, "celestial")
+        el.set("intensity", str(self.intensity))
+        el.set("azimuth", str(self.azimuth))
+        el.set("elevation", str(self.elevation))
+        # avara lights NEVER visible
+        el.set("visible", False)
+        # avara lights are all white
+        el.set("color", "1,1,1")
+
 

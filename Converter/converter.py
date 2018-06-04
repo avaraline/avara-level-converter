@@ -23,6 +23,7 @@ class Converter:
         self.tagline = None        # Map tagline
         self.author = None         # Map author
         self.description = None    # Map description
+        self.comments = []
 
         self.replace_vars = {}     # Dict of replacement variable values
         self.goodies = []          # List of all goodies
@@ -33,6 +34,8 @@ class Converter:
         self.free_solids = []      # List of all free solids
         self.g_vars = []           # List of globally concerned objects
         self.enums = {}            # Dict of all enums
+        self.lights = []
+        self.ambient = 0.4
 
         self.wall_height = 3       # Current wall height (default 3)
         self.wa = 0                # Current wa, resets after every wall
@@ -109,6 +112,7 @@ class Converter:
         getcontext().prec = 10
         lastText = False
         thisText = False
+        commentText = False
         if ops is None:
             return
         for op in ops:
@@ -125,8 +129,20 @@ class Converter:
             else:
                 thisText = False
                 if lastText:
-                    self.parse_text(self.cur_text)
-                    self.cur_text = ""
+                    # if "=" is at the end, we can't
+                    # pass to shlex until we have a bit more
+                    if not self.cur_text[-1] == "=": 
+                        if "/*" in self.cur_text:
+                            # start parsing comments
+                            commentText = True
+                        if "*/" in self.cur_text:
+                            commentText = False
+                            self.comments.append(self.cur_text)
+                            # we don't even want to wparse comments
+                            self.cur_text = ""
+                        if not commentText and self.cur_text:
+                            self.parse_text(self.cur_text)
+                        self.cur_text = ""
 
             # TODO: PARSE OVALS!
             if classname == "ClipRegion":
@@ -355,6 +371,8 @@ class Converter:
         skipnext = False
         for idx, word in enumerate(words):
             if '=' in word:
+                if len(word) == 1 and idx + 1 not in words:
+                    continue
                 if len(word) == 1:
                     newwords.pop()
                     newwords.append((words[idx - 1], words[idx + 1]))
@@ -414,21 +432,46 @@ class Converter:
                 self.parse_global_variable(word[0], word[1])
 
     def parse_global_variable(self, key, value):
-        if key == 'wa':
-            self.wa = Decimal(value)
+        if key[:5] == 'light':
+            idx = int(key.split("[")[1][0])
+            if idx not in self.lights:
+                self.lights.append(Light())
+            op = key.split("]")[1][1]
+            if op == "i":
+                self.lights[idx].intensity = value
+            if op == "a":
+                self.lights[idx].elevation = value
+            if op == "b":
+                self.lights[idx].azimuth = value
+        elif key == 'ambient':
+            self.ambient = value
+        elif key == 'wa':
+            self.wa = self.try_parse_decimal(value)
         elif key == 'wallHeight':
-            self.wall_height = Decimal(value)
+            self.wall_height = self.try_parse_decimal(value)
         elif key == 'baseHeight':
-            self.base_height = Decimal(value)
+            self.base_height = self.try_parse_decimal(value)
         elif key == 'designer':
             self.author = value
         elif key == 'information':
             self.tagline = value
         elif key == 'pointsToThickness':
-            self.pixel_to_thickness = Decimal(value)
+            self.pixel_to_thickness = self.try_parse_decimal(value)
         else:
-            # print(key, value)
-            self.replace_vars[key] = value
+            # print("%s = %s" % (key, value))
+            if value in self.replace_vars:
+                self.replace_vars[key] = self.replace_vars[value]
+            else:
+                self.replace_vars[key] = value
+
+    def try_parse_decimal(self, value):
+        try:
+            return Decimal(value)
+        # if its a string lets try to see 
+        # if we have createdl a variable for
+        # it before
+        except InvalidOperation:
+            return Decimal(self.replace_vars[value])
 
     def parse_adjust(self, word):
         if word == "SkyColor":

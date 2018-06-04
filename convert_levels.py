@@ -3,13 +3,10 @@ from Converter.converter import Converter
 import Converter.pict.reader as pReader
 import Converter.ledi.reader as lediReader
 import Converter.bspt.reader as bsptReader
-from Converter.helpers import byte_to_unsigned_tiny_int
 from lxml import etree
-import wave
 import argparse
 import sys
 import json
-import ffmpeg
 
 try:
     import audioop
@@ -73,16 +70,19 @@ def save_shapes(resource):
 
 def save_maps(resource, set_ledi):
     for pict in resource.values():
+        pictname = pict['name']
+
+        if pictname not in set_ledi['items']:
+            print("No LEDI found for '%s', skipping" % pictname)
+            continue
+
         ops = pReader.parse(pict['data'])
         conv = Converter()
         mapxml = conv.convert(ops)
-        pictname = pict['name']
-        filename = pictname + '.xml'
-        if pictname not in set_ledi['items']:
-            print("No LEDI found for %s, skipping" % pictname)
-            continue
+
         ledi = set_ledi['items'][pictname]
 
+        filename = ledi['title'] + "_" + pictname + '.xml'
         print("Writing level %s to %s" % (ledi['title'], filename))
 
         if mapxml is None:
