@@ -8,6 +8,7 @@ class BSP(object):
         self.res_id = ""
         self.name = bsp_dict['name']
         raw_data = bsp_dict['data']
+
         self.ref_count = bytes_to_unsigned_short(raw_data[0:2])
         self.lock_count = bytes_to_unsigned_short(raw_data[2:4])
 
@@ -18,12 +19,24 @@ class BSP(object):
         self.max_bounds = UniquePoint(raw_data[40:56])
 
         self.normal_count = bytes_to_unsigned_long(raw_data[56:60])
+
         self.edge_count = bytes_to_unsigned_long(raw_data[60:64])
         self.poly_count = bytes_to_unsigned_long(raw_data[64:68])
         self.color_count = bytes_to_unsigned_long(raw_data[68:72])
         self.point_count = bytes_to_unsigned_long(raw_data[72:76])
         self.vector_count = bytes_to_unsigned_long(raw_data[76:80])
         self.unique_edge_count = bytes_to_unsigned_long(raw_data[80:84])
+
+        if self.poly_count == 0:
+            print("Shape %s has no faces, making empty shape" % self.name)
+            self.normals = []
+            self.polys = []
+            self.edges = []
+            self.colors = []
+            self.points = []
+            self.vectors = []
+            self.unique_edges = []
+            return
 
         normal_offset = bytes_to_unsigned_long(raw_data[84:88])
         poly_offset = bytes_to_unsigned_long(raw_data[88:92])
