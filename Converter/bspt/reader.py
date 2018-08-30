@@ -1,6 +1,7 @@
 from Converter.helpers import *
 from Converter.bspt.datatypes import *
 from itertools import zip_longest
+import json
 
 class BSP(object):
     # https://github.com/jmunkki/Avara/blob/master/src/Libraries/BSP/BSPResStructures.h
@@ -117,7 +118,7 @@ class BSP(object):
         r += "\nunique edges: %s" % self.unique_edges
         return r
 
-    def serialize(self):
+    def serialize(self, int_colors=False):
         d = {}
         d["name"] = self.name
         d["res_id"] = self.res_id
@@ -129,7 +130,10 @@ class BSP(object):
         d["normals"] = serialize_list(self.normals)
         d["edges"] = self.edges
         d["polys"] = serialize_list(self.polys)
-        d["colors"] = serialize_list(self.colors)
+        if int_colors:
+            d["colors"] = [c.color_long for c in self.colors]
+        else:
+            d["colors"] = serialize_list(self.colors)
         d["vectors"] = serialize_list(self.vectors)
         d["unique_edges"] = serialize_list(self.unique_edges)
 
@@ -280,3 +284,31 @@ def parse(resource):
         bsp.res_id = res_id
         bsps.append(bsp)
     return bsps
+
+
+def bsp2json(data):
+    bsp = BSP({'data': data, 'name': ''})
+    d = bsp.serialize(int_colors=True)
+    out = {
+        'points': [p[:3] for p in d['points']],
+        'bounds': {
+            'min': d['min_bounds'][:3],
+            'max': d['max_bounds'][:3],
+        },
+        'center': d['enclosure_point'][:3],
+        'radius1': d['enclosure_point'][3],
+        'radius2': d['enclosure_radius'],
+        'polys': [],
+    }
+    for idx, (fe, ec, normal_idx, fp, bp, pvis, rs) in enumerate(d['polys']):
+        vec_idx, basept, color_idx, nvis = d['normals'][normal_idx]
+        normal = d['vectors'][vec_idx][:3]
+        color = d['colors'][color_idx]
+        tris = d['triangles_poly'][idx]
+        tri_points = d['triangles_verts_poly'][idx]
+        out['polys'].append({
+            'normal': normal,
+            'color': color,
+            'tris': [[tri_points[i] for i in t] for t in tris],
+        })
+    return json.dumps(out, indent=2, sort_keys=True)

@@ -111,13 +111,13 @@ ColorRecordLength = (32 * 2) + 4
 class ColorRecord():
     def __init__(self, raw_data):
         assert(len(raw_data) == ColorRecordLength)
-        color_long = bytes_to_long(raw_data[0:4])
+        self.color_long = bytes_to_long(raw_data[0:4])
         # convert to RGBA float color format
         self.color = [
-            ((color_long >> 8) & 0xff) / 254.0,
-            ((color_long >> 16) & 0xff) / 254.0,
-            ((color_long >> 24) & 0xff) / 254.0,
-            (color_long & 0xff) / 254.0
+            ((self.color_long >> 8) & 0xff) / 254.0,
+            ((self.color_long >> 16) & 0xff) / 254.0,
+            ((self.color_long >> 24) & 0xff) / 254.0,
+            (self.color_long & 0xff) / 254.0
         ]
         # colorCache[32] (COLORCACHESIZE)
         # this is not useful to most people because
